@@ -24,6 +24,7 @@ export const TaxCalculator: React.FC = () => {
   });
 
   const [result, setResult] = useState<TaxCalculationResult | null>(null);
+  const [taxRegime, setTaxRegime] = useState<'old' | 'new'>('new');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,8 +56,12 @@ export const TaxCalculator: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const calculationResult = calculateTax(inputs);
+    const calculationResult = calculateTax(inputs, taxRegime);
     setResult(calculationResult);
+  };
+
+  const handleRegimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaxRegime(e.target.checked ? 'new' : 'old');
   };
 
   return (
@@ -66,6 +71,53 @@ export const TaxCalculator: React.FC = () => {
           <h1 className="text-5xl font-bold mb-12 text-center text-gray-800">Indian Tax Calculator</h1>
           
           <div className="bg-white rounded-lg shadow-lg p-10 mb-12">
+            <div className="flex justify-center mb-8">
+              <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+                <button
+                  type="button"
+                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                    taxRegime === 'old' 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                  onClick={() => setTaxRegime('old')}
+                >
+                  Old Regime
+                </button>
+                <button
+                  type="button"
+                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                    taxRegime === 'new' 
+                      ? 'bg-white text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                  onClick={() => setTaxRegime('new')}
+                >
+                  New Regime
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    {taxRegime === 'new' ? 'New Tax Regime' : 'Old Tax Regime'}
+                  </h3>
+                  <div className="mt-2 text-sm text-blue-700">
+                    {taxRegime === 'new' 
+                      ? 'Under the new tax regime, you cannot claim most deductions and exemptions.'
+                      : 'Under the old tax regime, you can claim various deductions and exemptions.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-10">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
@@ -81,7 +133,7 @@ export const TaxCalculator: React.FC = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">PF Contribution (Yearly)</label>
                   <input
@@ -121,6 +173,7 @@ export const TaxCalculator: React.FC = () => {
                     onBlur={handleBlur}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
+                    disabled={taxRegime === 'new'}
                   />
                 </div>
 
@@ -149,6 +202,7 @@ export const TaxCalculator: React.FC = () => {
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     min="0"
                     max="100"
+                    disabled={taxRegime === 'new'}
                   />
                 </div>
 
@@ -162,6 +216,7 @@ export const TaxCalculator: React.FC = () => {
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={taxRegime === 'new'}
                   />
                 </div>
 
@@ -286,16 +341,28 @@ export const TaxCalculator: React.FC = () => {
                     </div>
                     <div className="pl-4 border-l-2 border-gray-300 space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">2.5L - 5L (5%):</span>
+                        <span className="text-gray-600">slab 1:</span>
                         <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab1)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">5L - 10L (20%):</span>
+                        <span className="text-gray-600">slab 2:</span>
                         <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Above 10L (30%):</span>
+                        <span className="text-gray-600">slab 3:</span>
                         <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab3)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">slab 4:</span>
+                        <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab4)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">slab 5:</span>
+                        <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab5)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">slab 6:</span>
+                        <span className="font-medium">{formatCurrency(result.breakdown.taxSlabs.slab6)}</span>
                       </div>
                     </div>
                     <div className="flex justify-between">
@@ -318,7 +385,7 @@ export const TaxCalculator: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Monthly Gross:</span>
-                      <span className="font-medium">{formatCurrency(result.inputs.grossSalary / 12)}</span>
+                      <span className="font-medium">{formatCurrency(result.breakdown.grossSalaryAfterBasicDeductions)}</span>
                     </div>
                     <div className="pl-4 border-l-2 border-gray-300 space-y-3">
                       <div className="flex justify-between">

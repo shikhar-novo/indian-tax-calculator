@@ -11,9 +11,6 @@ export interface TaxInputs {
 }
 
 export interface TaxBreakdown {
-  yearlyTax: number;
-  monthlyTax: number;
-  inHandSalary: number;
   taxableIncome: number;
   deductions: {
     standardDeduction: number;
@@ -28,11 +25,15 @@ export interface TaxBreakdown {
     slab1: number;  // 2.5L - 5L (5%)
     slab2: number;  // 5L - 10L (20%)
     slab3: number;  // Above 10L (30%)
+    slab4: number;  
+    slab5: number;  
+    slab6: number;  
   };
   surcharge: number;
   cess: number;
-  professionalTax: number;
-  labourWelfareFund: number;
+  yearlyTax: number;
+  inHandSalary: number;
+  grossSalaryAfterBasicDeductions: number;
 }
 
 export interface TaxCalculationResult {
