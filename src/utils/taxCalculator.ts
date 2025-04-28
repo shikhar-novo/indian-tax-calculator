@@ -1,183 +1,84 @@
-import { TaxInputs, TaxBreakdown, TaxCalculationResult } from '../types';
+export interface TaxInputs {
+  basicSalary: number;
+  hra: number;
+  specialAllowance: number;
+  rentPaid?: number;
+  section80C: number;
+  section80D: number;
+  nps: number;
+  otherIncome: number;
+}
 
 const STANDARD_DEDUCTION = 50000;
-const MAX_SECTION_80C = 150000;
-const MAX_SECTION_80D = 75000;
-const MAX_NPS = 50000;
 const PROFESSIONAL_TAX_PER_MONTH = 200;
-const LABOUR_WELFARE_FUND = 31;
 
-export const calculateTax = (inputs: TaxInputs): TaxCalculationResult => {
+export const calculateHRAExemption = (basicSalary: number, hra: number, rentPaid: number = 0) => {
+  const actualHRA = hra;
+  const actualRentPaid = rentPaid;
+  const basicSalaryComponent = basicSalary * 0.4;
+  const exemption = Math.min(actualHRA, actualRentPaid, basicSalaryComponent);
+  return exemption;
+};
+
+export const calculateTax = (inputs: TaxInputs) => {
   const {
-    grossSalary,
-    pfContribution,
-    gratuity,
-    totalInvestments,
+    basicSalary,
+    hra,
+    specialAllowance,
     rentPaid = 0,
-    basicSalary = grossSalary * 0.4, // Default to 40% of gross salary if not provided
-    hraPercentage = 40,
-    otherAllowances = 0,
-    employerPf = 0
+    section80C,
+    section80D,
+    nps,
+    otherIncome
   } = inputs;
 
-  // Step 1: Calculate adjusted taxable CTC
-  const adjustedTaxableCTC = grossSalary - pfContribution - gratuity;
+  // Calculate HRA exemption
+  const hraExemption = calculateHRAExemption(basicSalary, hra, rentPaid);
 
-  // Step 2: Calculate HRA exemption
-  const hraCalculation = calculateHRAExemption(basicSalary, hraPercentage, rentPaid);
+  // Calculate total salary
+  const totalSalary = basicSalary + hra + specialAllowance;
 
-  // Step 3: Calculate taxable salary
-  const taxableSalary = adjustedTaxableCTC;
+  // Calculate taxable salary after HRA exemption
+  const taxableSalaryAfterHRA = totalSalary - hraExemption;
 
-  // Step 4: Calculate deductions
-  const deductions = {
-    standardDeduction: STANDARD_DEDUCTION,
-    hraExemption: hraCalculation.finalExemption,
-    section80C: 0,
-    section80D: 0,
-    nps: 0,
-    otherDeductions: totalInvestments, // Use total investments as other deductions
-    professionalTax: PROFESSIONAL_TAX_PER_MONTH * 12 // Add professional tax to deductions
-  };
+  // Calculate total deductions
+  const totalDeductions = STANDARD_DEDUCTION + section80C + section80D + nps;
 
-  // Step 5: Calculate final taxable income
-  const taxableIncome = taxableSalary - Object.values(deductions).reduce((a, b) => a + b, 0);
+  // Calculate taxable income
+  const taxableIncome = taxableSalaryAfterHRA - totalDeductions + otherIncome;
 
-  // Step 6: Calculate tax based on slabs
-  const taxSlabs = calculateTaxSlabs(taxableIncome);
-
-  // Step 7: Calculate surcharge and cess
-  const surcharge = calculateSurcharge(taxableIncome, taxSlabs);
-  const cess = calculateCess(taxSlabs, surcharge);
-
-  // Step 8: Calculate final tax amounts
-  const yearlyTax = taxSlabs.slab1 + taxSlabs.slab2 + taxSlabs.slab3 + surcharge + cess;
-  const monthlyTax = yearlyTax / 12;
-
-  // Step 9: Calculate monthly in-hand salary
-  const monthlyDeductions = {
-    pf: pfContribution / 12,
-    tax: monthlyTax,
-    professionalTax: PROFESSIONAL_TAX_PER_MONTH,
-    labourWelfareFund: LABOUR_WELFARE_FUND / 12
-  };
-
-  const monthlyGross = adjustedTaxableCTC / 12;
-  const inHandSalary = monthlyGross - 
-    monthlyDeductions.pf - 
-    monthlyDeductions.tax - 
-    monthlyDeductions.professionalTax - 
-    monthlyDeductions.labourWelfareFund;
-
-  const breakdown: TaxBreakdown = {
-    yearlyTax,
-    monthlyTax,
-    inHandSalary,
-    taxableIncome,
-    deductions,
-    taxSlabs,
-    surcharge,
-    cess,
-    professionalTax: PROFESSIONAL_TAX_PER_MONTH * 12,
-    labourWelfareFund: LABOUR_WELFARE_FUND
-  };
-
-  return {
-    inputs,
-    breakdown,
-    monthlyDeductions,
-    hraCalculation
-  };
-}
-
-function calculateHRAExemption(
-  basicSalary: number,
-  hraPercentage: number,
-  rentPaid: number,
-  metroCity: boolean = true
-): { 
-  actualHRA: number;
-  rentPaidMinusBasic: number;
-  metroCityAllowance: number;
-  finalExemption: number;
-} {
-  const yearlyHRA = (basicSalary * hraPercentage) / 100;
-  const yearlyRentPaid = rentPaid * 12;
-  const tenPercentBasic = basicSalary * 0.1;
-  const rentPaidMinusBasic = yearlyRentPaid - tenPercentBasic;
-  const metroCityAllowance = basicSalary * 0.5;
-  
-  const finalExemption = Math.min(
-    yearlyHRA,
-    rentPaidMinusBasic,
-    metroCityAllowance
-  );
-
-  return {
-    actualHRA: yearlyHRA,
-    rentPaidMinusBasic,
-    metroCityAllowance,
-    finalExemption: Math.max(0, finalExemption)
-  };
-}
-
-function calculateTaxableSalary(
-  adjustedTaxableCTC: number,
-  hraExemption: number,
-  inputs: TaxInputs
-): number {
-  return adjustedTaxableCTC - hraExemption - STANDARD_DEDUCTION - inputs.gratuity;
-}
-
-function calculateTaxSlabs(taxableIncome: number) {
-  const slabs = {
-    slab1: 0,
-    slab2: 0,
-    slab3: 0,
-    slab4: 0
-  };
-
-  if (taxableIncome <= 250000) {
-    return slabs;
-  }
-
-  // Slab 1: 2.5L - 5L (5%)
-  slabs.slab1 = Math.min(taxableIncome - 250000, 250000) * 0.05;
-
-  if (taxableIncome <= 500000) {
-    return slabs;
-  }
-
-  // Slab 2: 5L - 10L (20%)
-  slabs.slab2 = Math.min(taxableIncome - 500000, 500000) * 0.20;
-
-  if (taxableIncome <= 1000000) {
-    return slabs;
-  }
-
-  // Slab 3: Above 10L (30%)
-  slabs.slab3 = (taxableIncome - 1000000) * 0.30;
-
-  return slabs;
-}
-
-function calculateSurcharge(taxableIncome: number, taxSlabs: TaxBreakdown['taxSlabs']): number {
-  const totalTaxBeforeSurcharge = taxSlabs.slab1 + taxSlabs.slab2 + taxSlabs.slab3;
-
-  if (taxableIncome <= 5000000) {
-    return 0;
-  } else if (taxableIncome <= 10000000) {
-    return totalTaxBeforeSurcharge * 0.10;
-  } else if (taxableIncome <= 20000000) {
-    return totalTaxBeforeSurcharge * 0.15;
-  } else if (taxableIncome <= 50000000) {
-    return totalTaxBeforeSurcharge * 0.25;
+  // Calculate tax based on new regime
+  let tax = 0;
+  if (taxableIncome <= 300000) {
+    tax = 0;
+  } else if (taxableIncome <= 600000) {
+    tax = (taxableIncome - 300000) * 0.05;
+  } else if (taxableIncome <= 900000) {
+    tax = 15000 + (taxableIncome - 600000) * 0.10;
+  } else if (taxableIncome <= 1200000) {
+    tax = 45000 + (taxableIncome - 900000) * 0.15;
+  } else if (taxableIncome <= 1500000) {
+    tax = 90000 + (taxableIncome - 1200000) * 0.20;
   } else {
-    return totalTaxBeforeSurcharge * 0.37;
+    tax = 150000 + (taxableIncome - 1500000) * 0.30;
   }
-}
 
-function calculateCess(taxSlabs: TaxBreakdown['taxSlabs'], surcharge: number): number {
-  const totalTaxBeforeCess = taxSlabs.slab1 + taxSlabs.slab2 + taxSlabs.slab3 + surcharge;
-  return totalTaxBeforeCess * 0.04; // 4% cess
-} 
+  // Add 4% health and education cess
+  const healthAndEducationCess = tax * 0.04;
+  tax += healthAndEducationCess;
+
+  // Add professional tax
+  const professionalTax = PROFESSIONAL_TAX_PER_MONTH * 12;
+  tax += professionalTax;
+
+  return {
+    totalSalary,
+    hraExemption,
+    taxableSalaryAfterHRA,
+    totalDeductions,
+    taxableIncome,
+    tax,
+    healthAndEducationCess,
+    professionalTax
+  };
+}; 
