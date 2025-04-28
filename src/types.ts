@@ -1,13 +1,12 @@
 export interface TaxInputs {
-  grossSalary: number;
-  pfContribution: number;
-  gratuity: number;
-  totalInvestments: number;
+  basicSalary: number;
+  hra: number;
+  specialAllowance: number;
   rentPaid?: number;
-  basicSalary?: number;
-  hraPercentage?: number;
-  otherAllowances?: number;
-  employerPf?: number;
+  section80C: number;
+  section80D: number;
+  nps: number;
+  otherIncome: number;
 }
 
 export interface TaxBreakdown {
@@ -37,18 +36,12 @@ export interface TaxBreakdown {
 }
 
 export interface TaxCalculationResult {
-  inputs: TaxInputs;
-  breakdown: TaxBreakdown;
-  monthlyDeductions: {
-    pf: number;
-    tax: number;
-    professionalTax: number;
-    labourWelfareFund: number;
-  };
-  hraCalculation: {
-    actualHRA: number;
-    rentPaidMinusBasic: number;
-    metroCityAllowance: number;
-    finalExemption: number;
-  };
+  totalSalary: number;
+  hraExemption: number;
+  taxableSalaryAfterHRA: number;
+  totalDeductions: number;
+  taxableIncome: number;
+  tax: number;
+  healthAndEducationCess: number;
+  professionalTax: number;
 } 

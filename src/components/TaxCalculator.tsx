@@ -12,15 +12,14 @@ const formatCurrency = (amount: number) => {
 
 export const TaxCalculator: React.FC = () => {
   const [inputs, setInputs] = useState<TaxInputs>({
-    grossSalary: 0,
-    pfContribution: 0,
-    gratuity: 0,
-    totalInvestments: 0,
-    rentPaid: 0,
     basicSalary: 0,
-    hraPercentage: 40, // Default HRA percentage
-    otherAllowances: 0,
-    employerPf: 0
+    hra: 0,
+    specialAllowance: 0,
+    rentPaid: 0,
+    section80C: 0,
+    section80D: 0,
+    nps: 0,
+    otherIncome: 0
   });
 
   const [result, setResult] = useState<TaxCalculationResult | null>(null);
@@ -66,62 +65,6 @@ export const TaxCalculator: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Gross Salary (Yearly)</label>
-            <input
-              type="number"
-              name="grossSalary"
-              value={inputs.grossSalary}
-              onChange={handleInputChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-2">PF Contribution (Yearly)</label>
-            <input
-              type="number"
-              name="pfContribution"
-              value={inputs.pfContribution}
-              onChange={handleInputChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Gratuity (Yearly)</label>
-            <input
-              type="number"
-              name="gratuity"
-              value={inputs.gratuity}
-              onChange={handleInputChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Total Deductions (NPS, 80C, 80D etc.)</label>
-            <input
-              type="number"
-              name="totalInvestments"
-              value={inputs.totalInvestments}
-              onChange={handleInputChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
             <label className="block text-sm font-medium mb-2">Basic Salary (Yearly)</label>
             <input
               type="number"
@@ -131,26 +74,40 @@ export const TaxCalculator: React.FC = () => {
               onFocus={handleFocus}
               onBlur={handleBlur}
               className="w-full p-2 border rounded"
+              required
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-2">HRA Percentage of Basic</label>
+            <label className="block text-sm font-medium mb-2">HRA (Yearly)</label>
             <input
               type="number"
-              name="hraPercentage"
-              value={inputs.hraPercentage}
+              name="hra"
+              value={inputs.hra}
               onChange={handleInputChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
               className="w-full p-2 border rounded"
-              min="0"
-              max="100"
+              required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Rent Paid (Monthly)</label>
+            <label className="block text-sm font-medium mb-2">Special Allowance (Yearly)</label>
+            <input
+              type="number"
+              name="specialAllowance"
+              value={inputs.specialAllowance}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Rent Paid (Yearly)</label>
             <input
               type="number"
               name="rentPaid"
@@ -161,88 +118,109 @@ export const TaxCalculator: React.FC = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Section 80C Investments</label>
+            <input
+              type="number"
+              name="section80C"
+              value={inputs.section80C}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Section 80D (Health Insurance)</label>
+            <input
+              type="number"
+              name="section80D"
+              value={inputs.section80D}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">NPS Contribution</label>
+            <input
+              type="number"
+              name="nps"
+              value={inputs.nps}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Other Income</label>
+            <input
+              type="number"
+              name="otherIncome"
+              value={inputs.otherIncome}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Calculate Tax
-        </button>
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+          >
+            Calculate Tax
+          </button>
+        </div>
       </form>
 
       {result && (
-        <div className="mt-8 space-y-6">
-          <h2 className="text-2xl font-bold">Tax Calculation Results</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-4">Salary Breakdown</h3>
-              <div className="space-y-2">
-                <p>Gross Salary: {formatCurrency(result.inputs.grossSalary)}</p>
-                <p>Basic Salary: {formatCurrency(result.inputs.basicSalary || 0)}</p>
-                <p>PF Contribution: {formatCurrency(result.inputs.pfContribution)}</p>
-                <p>Gratuity: {formatCurrency(result.inputs.gratuity)}</p>
-                <p>Other Allowances: {formatCurrency(result.inputs.otherAllowances || 0)}</p>
-              </div>
+        <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Tax Calculation Results</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="font-medium">Total Salary:</p>
+              <p>{formatCurrency(result.totalSalary)}</p>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-4">HRA Calculation</h3>
-              <div className="space-y-2">
-                <p>HRA exemption: Least of:</p>
-                <div className="pl-4 border-l-2 border-gray-300">
-                  <p>Actual HRA received: {formatCurrency(result.hraCalculation.actualHRA)}</p>
-                  <p>Rent paid - 10% of basic: {formatCurrency((result.inputs.rentPaid || 0) * 12)} - {formatCurrency((result.inputs.basicSalary || 0) * 0.1)} = {formatCurrency(result.hraCalculation.rentPaidMinusBasic)}</p>
-                  <p>50% of basic (metro city assumed): {formatCurrency(result.hraCalculation.metroCityAllowance)}</p>
-                </div>
-                <p className="font-semibold">Exempt HRA: {formatCurrency(result.hraCalculation.finalExemption)}</p>
-              </div>
+            <div>
+              <p className="font-medium">HRA Exemption:</p>
+              <p>{formatCurrency(result.hraExemption)}</p>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-4">Deductions</h3>
-              <div className="space-y-2">
-                <p>Standard Deduction: {formatCurrency(result.breakdown.deductions.standardDeduction)}</p>
-                <p>HRA Exemption: {formatCurrency(result.breakdown.deductions.hraExemption)}</p>
-                <p>Other Deductions (NPS, 80C, 80D etc.): {formatCurrency(result.inputs.totalInvestments)}</p>
-                <p>Professional Tax: {formatCurrency(result.breakdown.deductions.professionalTax)}</p>
-                <p className="font-semibold">Total Deductions: {formatCurrency(
-                  result.breakdown.deductions.standardDeduction +
-                  result.breakdown.deductions.hraExemption +
-                  result.inputs.totalInvestments +
-                  result.breakdown.deductions.professionalTax
-                )}</p>
-              </div>
+            <div>
+              <p className="font-medium">Taxable Salary (after HRA):</p>
+              <p>{formatCurrency(result.taxableSalaryAfterHRA)}</p>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-4">Tax Calculation</h3>
-              <div className="space-y-2">
-                <p>Taxable Income: {formatCurrency(result.breakdown.taxableIncome)}</p>
-                <div className="pl-4 border-l-2 border-gray-300">
-                  <p>2.5L - 5L (5%): {formatCurrency(result.breakdown.taxSlabs.slab1)}</p>
-                  <p>5L - 10L (20%): {formatCurrency(result.breakdown.taxSlabs.slab2)}</p>
-                  <p>Above 10L (30%): {formatCurrency(result.breakdown.taxSlabs.slab3)}</p>
-                </div>
-                <p>Surcharge: {formatCurrency(result.breakdown.surcharge)}</p>
-                <p>Health & Education Cess (4%): {formatCurrency(result.breakdown.cess)}</p>
-                <p className="font-semibold">Total Tax: {formatCurrency(result.breakdown.yearlyTax)}</p>
-              </div>
+            <div>
+              <p className="font-medium">Total Deductions:</p>
+              <p>{formatCurrency(result.totalDeductions)}</p>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-4">Monthly Breakdown</h3>
-              <div className="space-y-2">
-                <p>Monthly Gross: {formatCurrency(result.inputs.grossSalary / 12)}</p>
-                <div className="pl-4 border-l-2 border-gray-300">
-                  <p>Monthly PF: {formatCurrency(result.monthlyDeductions.pf)}</p>
-                  <p>Monthly Tax: {formatCurrency(result.monthlyDeductions.tax)}</p>
-                  <p>Professional Tax: {formatCurrency(result.monthlyDeductions.professionalTax)}</p>
-                  <p>Labour Welfare Fund: {formatCurrency(result.monthlyDeductions.labourWelfareFund)}</p>
-                </div>
-                <p className="font-semibold">In-hand Salary: {formatCurrency(result.breakdown.inHandSalary)}</p>
-              </div>
+            <div>
+              <p className="font-medium">Taxable Income:</p>
+              <p>{formatCurrency(result.taxableIncome)}</p>
+            </div>
+            <div>
+              <p className="font-medium">Total Tax:</p>
+              <p>{formatCurrency(result.tax)}</p>
+            </div>
+            <div>
+              <p className="font-medium">Health & Education Cess:</p>
+              <p>{formatCurrency(result.healthAndEducationCess)}</p>
+            </div>
+            <div>
+              <p className="font-medium">Professional Tax:</p>
+              <p>{formatCurrency(result.professionalTax)}</p>
             </div>
           </div>
         </div>
